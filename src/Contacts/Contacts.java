@@ -1,32 +1,29 @@
 package Contacts;
 
+import org.w3c.dom.ls.LSOutput;
+
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
+import java.nio.file.*;
+import java.util.*;
 
 public class Contacts {
 
 
-    //print file method
-    public static void printFile(Path filePath) throws IOException {
+    //PRINT ALL method
+    public static void printContacts(Path filePath) throws IOException {
+//        System.out.printf(("%-10s | %-13s", "Name", "Number");
         System.out.println();
+//        System.out.println("___Name___|__Number__");
+        System.out.printf("%-10s | %-13s\n", new String("NAME"), new String ("NUMBER"));
         List<String> fileContents = Files.readAllLines(filePath);
-        for (int i = 0; i < fileContents.size(); i++) {
-            System.out.printf("\n%s",  fileContents.get(i)); //each line
-
-//            System.out.println();
+        for (String fileContent : fileContents) {
+            System.out.printf("%s\n", fileContent); //breaks each line to display each number in a column
         }
     }
-
-    //Search method
-    public static void searchFile(Path filePath) throws IOException {
+    //SEARCH method
+    public static void searchContact(Path filePath) throws IOException {
         Scanner sc = new Scanner(System.in);
 
         System.out.println("Please enter the name you would like to search for");
@@ -40,34 +37,38 @@ public class Contacts {
             }
         }
     }
+    //ADD contact
+    public static void addContact (Path filepath) throws IOException {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("[Name Number]");
+        String name = sc.next();
+        String newNumber = sc.next();
+        String contact = String.format("%-10s | %-13s", name, newNumber);
+        List<String> newContact = Collections.singletonList(contact);
+        Files.write(filepath, newContact, StandardOpenOption.APPEND);
 
+        System.out.println(contact + "has been added contacts");
+    }
+
+    //DELETE method
     public static void deleteContact(Path filePath) throws IOException {
         Scanner sc = new Scanner(System.in);
         System.out.println("Please enter the name you would like to search for");
         String input = sc.nextLine();
         List<String> fileContents = Files.readAllLines(filePath);
-        System.out.println("file contents before: \n" + fileContents);
+//        System.out.println("file contents before: \n" + fileContents);
         for (int i = 0; i < fileContents.size(); i++) {
             if (fileContents.get(i).contains(input)){
                 fileContents.remove(fileContents.get(i));
+                System.out.println(input + "has been deleted from contacts");
             }
         }
-        //bookmark
-
-//        String directory = "./src/Contacts";
-//
-//        String filename = "Contacts-List.txt";
-//        Path contactPath = Paths.get(directory, filename);
-
 
         Files.write(Paths.get("./src/Contacts/Contacts-List.txt"), fileContents);
-        System.out.println("file contents after: \n" + fileContents);
+//        System.out.println("file contents after: \n" + fileContents);
     }
 
     public static void main(String[] args) throws IOException {
-        //********SCANNER**********
-        Scanner sc = new Scanner(System.in);
-
         System.out.println(
                 "What would you like to do?\n" +
                         "\n" +
@@ -80,63 +81,33 @@ public class Contacts {
                         "Enter an option (1, 2, 3, 4 or 5): "
         );
 
-        System.out.println();
-        //Print file
+        String path = "./src/Contacts/Contacts-List.txt";
+        Path contactPath = Paths.get(path);
 
-        Path filepathtoList = Paths.get("./src/Contacts/Contacts-List.txt");
+        Files.createDirectories(contactPath.getParent());
+        File file = new File(String.valueOf(contactPath));
 
-        //Setting up file path
-
-        String directory = "./src/Contacts";
-
-        String filename = "Contacts-List.txt";
-
-        Path dataDirectory = Paths.get(directory);
-
-        Path dataFile = Paths.get(directory);
-
-        if (Files.notExists(dataDirectory)) {
-
-            Files.createDirectories(dataDirectory);
+        if (!file.exists()) {
+            Files.createFile(contactPath);
         }
-
-        if (Files.notExists(dataFile)) {
-
-            Files.createFile(dataFile);
-        }
-
-        //APPEND to contact list
-        Path contactPath = Paths.get(directory, filename);
 
         //**********GET INPUT***********
-
-        Scanner inputScanner = new Scanner(System.in);
+        Scanner sc = new Scanner(System.in);
         int input;
         do {
-            input = inputScanner.nextInt();
-            switch (input) { //DISPLAY
-                case 1:
-                    printFile(filepathtoList);
-                    break;
-                case 2: //ADD
-                    System.out.println("[Name Number]");
-                    String name = sc.next();
-                    String newNumber = sc.next();
-
-                    List<String> newContact = Arrays.asList(name + " | " + newNumber);
-                    Files.write(contactPath, newContact, StandardOpenOption.APPEND);
-                    break;
-                case 3: //SEARCH
-                    searchFile(filepathtoList);
-                    break;
-                case 4: //DELETE
-                    deleteContact(filepathtoList);
-                    break;
-                case 5:
-                    System.out.println("Exiting...");
-                    break;
+            input = sc.nextInt();
+            switch (input) {
+                case 1 -> //DISPLAY
+                        printContacts(contactPath);
+                case 2 -> //ADD
+                        addContact(contactPath);
+                case 3 -> //SEARCH
+                        searchContact(contactPath);
+                case 4 -> //DELETE
+                        deleteContact(contactPath);
+                case 5 -> //EXIT
+                        System.out.println("Exiting...");
             }
         } while (input != 5);
-
     }
 }
