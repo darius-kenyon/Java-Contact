@@ -12,12 +12,13 @@ public class Contacts {
     //PRINT ALL method
     public static void printContacts(Path filePath) throws IOException {
         System.out.println();
-        System.out.printf("%-10s | %-13s\n", "NAME","NUMBER");
+        System.out.printf("%-10s | %-13s\n", "NAME", "NUMBER");
         List<String> fileContents = Files.readAllLines(filePath);
         for (String fileContent : fileContents) {
             System.out.printf("%s\n", fileContent); //breaks each line to display each number in a column
         }
     }
+
     //SEARCH method
     public static void searchContact(Path filePath) throws IOException {
         Scanner sc = new Scanner(System.in);
@@ -28,32 +29,42 @@ public class Contacts {
         System.out.println();
         List<String> fileContents = Files.readAllLines(filePath);
         for (int i = 0; i < fileContents.size(); i++) {
-            if (fileContents.get(i).contains(input)){
+            if (fileContents.get(i).contains(input)) {
                 System.out.printf("%d %s", i + 1, fileContents.get(i));
             }
         }
     }
+
     //ADD contact
-    public static void addContact (Path filepath) throws IOException {
+    public static void addContact(Path filepath) throws IOException {
         Scanner sc = new Scanner(System.in);
-        System.out.println("[Name Number]");
+        System.out.print("Name: ");
         String name = sc.next();
-        int newNumber = sc.nextInt();
-        String formatNumber = Integer.toString(newNumber);
 
-        String formattedNumber = null;
-        if(formatNumber.length() == 10){
-            String areaCode = formatNumber.substring(0, 3);
-            String firstHalf = formatNumber.substring(3, 6);
-            String secondHalf = formatNumber.substring(6, 10);
-            formattedNumber = String.format("(%s) %s-%s", areaCode,firstHalf,secondHalf);
-        }
+        boolean pass = true;
+        do {
+            System.out.print("Number: ");
+            String number = sc.next(); //no need to worry about InputMismatchException when we can just remove anything that isn't a number, and will still be a string that we can splice to format
+            number = number.replaceAll("[^0-9]", "");
 
-        String contact = String.format("%-30s | %-30s ", name, formattedNumber);
-        List<String> newContact = Collections.singletonList(contact);
-        Files.write(filepath, newContact, StandardOpenOption.APPEND);
+            if(number.length() == 10){
 
-        System.out.println(name + "has been added contacts");
+                String areaCode = number.substring(0, 3);
+                String firstHalf = number.substring(3, 6);
+                String secondHalf = number.substring(6, 10);
+
+                String formatNumber = String.format("(%s) %s-%s", areaCode, firstHalf, secondHalf);
+                String contact = String.format("%-15s | %-15s ", name, formatNumber);
+
+                List<String> newContact = Collections.singletonList(contact);
+                Files.write(filepath, newContact, StandardOpenOption.APPEND);
+                System.out.println(name + " has been added to contacts");
+
+            } else {
+                System.out.println("Please enter a valid number (must be 9 digits long)");
+                pass = false;
+            }
+        } while (!pass);
     }
 
     //DELETE method
@@ -64,7 +75,7 @@ public class Contacts {
         List<String> fileContents = Files.readAllLines(filePath);
 //        System.out.println("file contents before: \n" + fileContents);
         for (int i = 0; i < fileContents.size(); i++) {
-            if (fileContents.get(i).contains(input)){
+            if (fileContents.get(i).contains(input)) {
                 fileContents.remove(fileContents.get(i));
                 System.out.println(input + "has been deleted from contacts");
             }
